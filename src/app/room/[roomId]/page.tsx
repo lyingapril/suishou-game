@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { useGameStore, pusher, type Player, type Card } from '@/store/gameStore';
+import { useGameStore, type Card } from '@/store/gameStore';
 
 // 玩家信息组件 - 延迟渲染以避免Hydration错误
 const PlayerInfo = ({ roomId, currentPlayer, onLeave }: {
@@ -53,25 +53,6 @@ const PlayerInfo = ({ roomId, currentPlayer, onLeave }: {
   );
 };
 
-// 生成示例卡牌
-const generateSampleCards = (): Card[] => {
-  const values = ['3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A', '2', '小王', '大王'];
-  const suits = ['红桃', '方块', '黑桃', '梅花'];
-  
-  const cards: Card[] = [];
-  while (cards.length < 10) {
-    const value = values[Math.floor(Math.random() * values.length)];
-    const suit = value.includes('王') ? '' : suits[Math.floor(Math.random() * suits.length)];
-    const id = `card-${value}-${suit}-${Date.now()}-${cards.length}`;
-    
-    if (!cards.some(c => c.value === value && c.suit === suit)) {
-      cards.push({ id, value, suit });
-    }
-  }
-  
-  return cards;
-};
-
 export default function RoomPage() {
   const { roomId } = useParams();
   const router = useRouter();
@@ -112,7 +93,7 @@ export default function RoomPage() {
         leaveRoom();
       }
     };
-  }, [roomId, isInRoom, joinRoom, receiveCards, router, isHydrated]);
+  }, [roomId, isInRoom, joinRoom, leaveRoom, receiveCards, router, isHydrated]);
   // 处理离开房间
   const handleLeave = () => {
     router.push('/');

@@ -129,7 +129,7 @@ const dealCardsToPlayers = (
   console.log(`[发牌] 玩家${currentState.currentPlayer.id}：10张牌；玩家${player2Id}：10张牌`);
 
   // 3. 更新当前玩家手牌
-  set((state) => ({ handCards: player1Cards }));
+  set(() => ({ handCards: player1Cards }));
 
   // 4. 发送「给对方发牌」事件（同步手牌给第二个玩家）
   channel.trigger('client-deal-cards', {
@@ -304,7 +304,7 @@ export const useGameStore = create<GameState>()(
             }));
           });
 
-          channel.bind('pusher:subscription_error', (error: any) => {
+          channel.bind('pusher:subscription_error', (error: PusherType.default) => {
             console.error(`订阅房间 ${roomId} 错误：`, error);
           });
 
@@ -384,40 +384,3 @@ export const useGameStore = create<GameState>()(
     }
   )
 );
-
-// -------------------------- 5. 抽取事件绑定逻辑（避免重复代码） --------------------------
-// 单独抽取房间事件绑定，让代码更简洁，避免重复逻辑
-const bindRoomEvents = (
-  channel: PusherType.Channel,
-  set: (state: Partial<GameState> | ((state: GameState) => Partial<GameState>)) => void,
-  get: () => GameState
-) => {
-  const currentState = get();
-
-  // 绑定「玩家加入」事件（和官方示例 bind 逻辑一致）
-  channel.bind('client-player-joined', (player: Player) => {
-    // 过滤自己：不把当前玩家加入到自己的「其他玩家」列表
-    if (player.id === currentState.currentPlayer.id) {
-      return;
-    }
-
-    set((prevState) => {
-      // 防重复添加：已存在的玩家不重复加入
-      const isPlayerExists = prevState.otherPlayers.some(p => p.id === player.id);
-      if (isPlayerExists) {
-        return prevState; // 无更新，避免触发循环
-      }
-
-      return {
-        otherPlayers: [...prevState.otherPlayers, player]
-      };
-    });
-  });
-
-  // 绑定「出牌」事件（和官方示例 bind 逻辑一致）
-  channel.bind('client-card-played', (data: { playerId: string; card: Card }) => {
-    set((prevState) => ({
-      tableCards: [...prevState.tableCards, data]
-    }));
-  });
-};

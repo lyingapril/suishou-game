@@ -13,7 +13,7 @@ const pusher = new Pusher({
 export async function POST(req: NextRequest) {
   const body = await req.text();
   const [socketId, channelName] = body.split('&').map(param => {
-    const [key, value] = param.split('=');
+    const [value] = param.split('=');
     return decodeURIComponent(value);
   });
 
