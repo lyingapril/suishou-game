@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { useGameStore, type Card } from '@/store/gameStore';
+import { useGameStore } from '@/store/gameStore';
 
 // 玩家信息组件 - 延迟渲染以避免Hydration错误
 const PlayerInfo = ({ roomId, currentPlayer, onLeave }: {
